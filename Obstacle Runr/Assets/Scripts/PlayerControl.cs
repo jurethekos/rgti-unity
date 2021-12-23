@@ -5,7 +5,12 @@ using UnityEngine;
 public class PlayerControl : MonoBehaviour
 {
     [Range(1, 50)]
-    public float torque = 40.0f;
+    public float torque = 15.0f;
+    public Transform cam;
+    public float jump = 5;
+    private float jumpCooldown = 0.0f;
+    [Range(1, 50)]
+    public float maxVelocity = 15; //default = 7
 
     private Rigidbody rb;
 
@@ -13,6 +18,7 @@ public class PlayerControl : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.maxAngularVelocity = maxVelocity;
     }
 
     // Update is called once per frame
@@ -20,9 +26,17 @@ public class PlayerControl : MonoBehaviour
     {
         float ha = Input.GetAxis("Horizontal");
         float va = Input.GetAxis("Vertical");
+        rb.maxAngularVelocity = maxVelocity;
 
-        Debug.Log(Vector3.forward);
-        rb.AddTorque(Vector3.forward * ha * -this.torque, ForceMode.Acceleration);
-        rb.AddTorque(Vector3.right * va * this.torque, ForceMode.Acceleration);
+        rb.AddTorque(cam.forward * ha * -this.torque, ForceMode.Acceleration);
+        rb.AddTorque(cam.right * va * this.torque, ForceMode.Acceleration);
+
+        if(Input.GetButtonDown("Jump") && jumpCooldown <= 0){
+            rb.velocity = rb.velocity + (Vector3.up * jump);
+            jumpCooldown = 1;
+        }
+        if(jumpCooldown > 0){
+            jumpCooldown -= Time.deltaTime;
+        }
     }
 }
